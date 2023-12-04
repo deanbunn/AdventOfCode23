@@ -17,80 +17,163 @@ $dynFRW = "";
 #Var for Dynamic Next Row to Parse
 $dynLRW = "";
 
+#ArrayList of Special Characters
+$alSpecialChars = [System.Collections.ArrayList]::new();
+[void]$alSpecialChars.Add("@");
+[void]$alSpecialChars.Add("*");
+[void]$alSpecialChars.Add("/");
+[void]$alSpecialChars.Add("\");
+[void]$alSpecialChars.Add("-");
+[void]$alSpecialChars.Add("+");
+[void]$alSpecialChars.Add("&");
+[void]$alSpecialChars.Add("#");
+[void]$alSpecialChars.Add("$");
+[void]$alSpecialChars.Add("%");
+[void]$alSpecialChars.Add("=");
+
 #Var for Grand Total
 [int]$nGrandTotal = 0;
 
-#Load Engine Scheme Data Into Custom Array of Objects
-foreach($flEngineSchem in (Get-Content -Path ./input.txt))
+#Load Input Data
+$fdEngineScheme = Get-Content -Path ./input.txt;
+
+#Loop Through Each Line in the Input Data File 
+for($h = 0; $h -lt $fdEngineScheme.Count; $h++)
 {
-    #Custom Object 
-    $cstEngSch = new-object PSObject -Property (@{ RowNum=0; RowChars=@(); RowData=""; });
 
-    #Load Row Number
-    $cstEngSch.RowNum = $nRowNbr;
+    #Get Array of Values for the Current Line
+    $arrCrntDataRow = $fdEngineScheme[$h].ToCharArray();
 
-    $cstEngSch.RowChars = $flEngineSchem.ToCharArray();
+    #Var for Past Data Row
+    $arrPastDataRow = @();
 
-    $cstEngSch.RowData = $flEngineSchem;
-
-    #Add Custom Object to Whole Engine Schematic Array
-    $arrEngineSchematic += $cstEngSch;
-
-    $nRowNbr++;
-
-}#End of Input.txt Load
-
-
-#Loop Through Custom Object Array
-foreach($cEngineSchem in ($arrEngineSchematic | Sort-Object -Property RowNum | Select-Object -First 2))
-{
-    
-    #Array of Characters for Active Row Data
-    $arrCrntRowData = $cEngineSchem.RowData.ToCharArray();
+    #Var for Next Data Row
+    $arrNextDataRow = @();
 
     #Var for Dynamic Number to Parse
     $dynNmbr = "";
 
     #Var for Push Number to List
-    $bPshNmbr = false;
+    $bPshNmbr = $false;
+
+    #Check for Past Data Row
+    if($h -ne 0)
+    {
+        $arrPastDataRow = $fdEngineScheme[$h -1].ToCharArray();
+    }
+
+    #Check for Next Data Row
+    if($h -lt ($fdEngineScheme.Count -1))
+    {
+        $arrNextDataRow = $fdEngineScheme[$h +1].ToCharArray();
+    }
 
     #Loop Through Row Data Looking for Numbers to Check
-    for($i = 0; $i -lt $arrCrntRowData.Count; $i++)
+    for($i = 0; $i -lt $arrCrntDataRow.Count; $i++)
     {
 
-        #Check if Character is a Number
-        if($arrCrntRowData[$i] -match "\d+")
-        {
-            $dynNmbr += $arrCrntRowData[$i];
+        <#
+            if($arrCrntDataRow[$i] -match "\d+" -eq $false -and $arrCrntDataRow[$i].ToString() -ne "." -and $alSpecialChars.Contains($arrCrntDataRow[$i].ToString()) -eq $false)
+            {
+                Write-Output $arrCrntDataRow[$i].ToString();
+            }
+        #>
 
-            #Checks for Associated Symbols
-            if((($i -ne 0) -and $arrCrntRowData[$i-1] -ne "."))
+        #Check if Character is a Number
+        if($arrCrntDataRow[$i].ToString() -match "\d+")
+        {
+
+            #Add Number to Dynamic Number
+            $dynNmbr += $arrCrntDataRow[$i];
+
+            ######################################
+            #Check for Part Number Values
+            ######################################
+
+            #Check for Previos Row Associated Values
+            if($arrPastDataRow.Count -gt 0)
             {
 
+                #Checking Upper Left Diagonal
+                if($i -gt 0 -and $alSpecialChars.Contains($arrPastDataRow[$i -1].ToString()))
+                {
+                    $bPshNmbr = $true;
+                }
+
+                #Checking Directly Above
+                if($alSpecialChars.Contains($arrPastDataRow[$i]))
+                {
+                    $bPshNmbr = $true;
+                }
+
+                #Checking Upper Right Diagonal
+                if($i -lt ($arrPastDataRow.Count -2) -and $alSpecialChars.Contains($arrPastDataRow[$i +1].ToString()))
+                {
+                    $bPshNmbr = $true;
+                }
+                
             }
 
-        }
-        elseif([string]::IsNullOrEmpty($dynNmbr) -eq $false)
-        {
-            write-Output $dynNmbr; #Would be a Push with Part Number Status Check
-            $dynNmbr = "";
+            #Check Current Row Associated Values Left Side
+            if($i -gt 0 -and $alSpecialChars.Contains($arrCrntDataRow[$i -1].ToString()))
+            {
+                $bPshNmbr = $true;
+            }
+
+            #Check Current Row Associated Values Right Side
+            if($i -lt ($arrCrntDataRow.Count -2) -and $alSpecialChars.Contains($arrCrntDataRow[$i +1].ToString()))
+            {
+                $bPshNmbr = $true;
+            }
+
+            #Check Next Row Associated Values
+            if($arrNextDataRow.Count -gt 0)
+            {
+
+                if($i -gt 0 -and $alSpecialChars.Contains($arrNextDataRow[$i -1].ToString()))
+                {
+                    $bPshNmbr = $true;
+                }
+
+                if($alSpecialChars.Contains($arrNextDataRow[$i].ToString()))
+                {
+                    $bPshNmbr = $true;
+                }
+
+                if($i -lt ($arrNextDataRow.Count -2) -and $alSpecialChars.Contains($arrNextDataRow[$i +1].ToString()))
+                {
+                    $bPshNmbr = $true;
+                }
+
+            }
+            
+            #Check If At End of Line or The Next Character is Not a Number
+            if(($i -eq ($arrCrntDataRow.Count -1)) -or ($arrCrntDataRow[$i +1].ToString() -match "\d+" -eq $false))
+            {
+                #Check to Push The Number
+                if($bPshNmbr -eq $true)
+                {
+                    $nGrandTotal += [int]$dynNmbr;
+                }
+                
+                #Reset the Dynamic and Push Value
+                $bPshNmbr = $false
+                $dynNmbr = "";
+
+            }#End of End of the Line and Next Character Checks
+
         }
         else
         {
             $dynNmbr = "";
         }
 
-    }
-    
-    
-
-}
-
-#Write-Output $arrEngineSchematic.Count;
+    }#End of For $crntDataRow Loop
 
 
-#$arrEngineSchematic;
+}#End of $fdEngineScheme
 
+Write-Output $nGrandTotal.ToString()
 
 
 <#
