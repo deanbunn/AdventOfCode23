@@ -3,19 +3,8 @@
     Author: deanbunn
 #>
 
-# 140 Characters Each Line
-
 #Array for Whole Engine Schematic
 $arrEngineSchematic = @();
-
-#Var for Row Number
-[int]$nRowNbr = 0;
-
-#Var for Dynamic First Row to Parse
-$dynFRW = "";
-
-#Var for Dynamic Next Row to Parse
-$dynLRW = "";
 
 #ArrayList of Special Characters
 $alSpecialChars = [System.Collections.ArrayList]::new();
@@ -72,15 +61,8 @@ for($h = 0; $h -lt $fdEngineScheme.Count; $h++)
     for($i = 0; $i -lt $arrCrntDataRow.Count; $i++)
     {
 
-        <#
-            if($arrCrntDataRow[$i] -match "\d+" -eq $false -and $arrCrntDataRow[$i].ToString() -ne "." -and $alSpecialChars.Contains($arrCrntDataRow[$i].ToString()) -eq $false)
-            {
-                Write-Output $arrCrntDataRow[$i].ToString();
-            }
-        #>
-
         #Check if Character is a Number
-        if($arrCrntDataRow[$i].ToString() -match "\d+")
+        if($arrCrntDataRow[$i].ToString() -match "\d")
         {
 
             #Add Number to Dynamic Number
@@ -101,7 +83,7 @@ for($h = 0; $h -lt $fdEngineScheme.Count; $h++)
                 }
 
                 #Checking Directly Above
-                if($alSpecialChars.Contains($arrPastDataRow[$i]))
+                if($alSpecialChars.Contains($arrPastDataRow[$i]).ToString())
                 {
                     $bPshNmbr = $true;
                 }
@@ -148,33 +130,28 @@ for($h = 0; $h -lt $fdEngineScheme.Count; $h++)
             }
             
             #Check If At End of Line or The Next Character is Not a Number
-            if(($i -eq ($arrCrntDataRow.Count -1)) -or ($arrCrntDataRow[$i +1].ToString() -match "\d+" -eq $false))
+            if(($i -eq ($arrCrntDataRow.Count -1)) -or ($arrCrntDataRow[$i +1].ToString() -match "\d" -eq $false))
             {
+
                 #Check to Push The Number
                 if($bPshNmbr -eq $true)
                 {
-                    $nGrandTotal += [int]$dynNmbr;
+                    $nGrandTotal += [int]$dynNmbr;          
                 }
-                
+
                 #Reset the Dynamic and Push Value
                 $bPshNmbr = $false
                 $dynNmbr = "";
 
             }#End of End of the Line and Next Character Checks
 
-        }
-        else
-        {
-            $dynNmbr = "";
-        }
+        }#End of Character Digit Check
 
     }#End of For $crntDataRow Loop
 
-
 }#End of $fdEngineScheme
 
-Write-Output $nGrandTotal.ToString()
-
+Write-Output $nGrandTotal.ToString();
 
 <#
 
