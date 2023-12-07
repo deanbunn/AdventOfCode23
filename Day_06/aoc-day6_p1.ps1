@@ -1,5 +1,5 @@
 <# 
-    Script: aoc-day6.ps1
+    Script: aoc-day6_p1.ps1
     Author: deanbunn
 #>
 
