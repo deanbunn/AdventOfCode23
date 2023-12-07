@@ -61,9 +61,9 @@ foreach($flScratchCard in $fdScratchCards)
 Write-Output $nGrandTotal.ToString();
 
 
-
-
 <#
+
+--- Part One ---
 
 The Elf leads you over to the pile of colorful cards. There, you discover dozens of scratchcards, all with their opaque covering already scratched off. 
 Picking one up, it looks like each card has two lists of numbers separated by a vertical bar (|): a list of winning numbers and then a list of numbers you have. 
@@ -95,6 +95,7 @@ So, in this example, the Elf's pile of scratchcards is worth 13 points.
 Take a seat in the large pile of colorful cards. How many points are they worth in total?
 
 --- Part Two ---
+
 Just as you're about to report your findings to the Elf, one of you realizes that the rules have actually been printed on the back of every card this whole time.
 
 There's no such thing as "points". Instead, scratchcards only cause you to win more scratchcards equal to the number of winning numbers you have.
