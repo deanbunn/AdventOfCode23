@@ -1,3 +1,3 @@
-## Advent of Code 23 Submissions
+## Advent of Code Submissions
 
 

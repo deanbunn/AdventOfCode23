@@ -20,7 +20,7 @@ Function Check-Card($dCard)
         "8" { $rtnAmount = 8; Break}
         "9" { $rtnAmount = 9; Break}
         "T" { $rtnAmount = 10; Break}
-        "J" { $rtnAmount = 11; Break}
+        "J" { $rtnAmount = 1; Break}
         "Q" { $rtnAmount = 12; Break}
         "K" { $rtnAmount = 13; Break}
         "A" { $rtnAmount = 14; Break}
@@ -36,7 +36,7 @@ Function Check-Card($dCard)
 $arrCstHandData = @();
 
 #Load Input Data
-$fdHandData = Get-Content -Path ./input.txt;
+$fdHandData = Get-Content -Path ./inputtest.txt;
 
 foreach($fdHand in $fdHandData)
 {
@@ -62,6 +62,13 @@ foreach($fdHand in $fdHandData)
 
     #Group Cards by Count
     $arrGrpByCards = $arrCards | Group-Object -NoElement | Sort-Object -Property Count -Descending;
+
+    foreach($gbc in $arrGrpByCards)
+    {
+        Write-Output $gbc;
+    }
+
+    #Count and Name
 
     #Determine Hand Value
     if($arrGrpByCards[0].Count -eq 5)
@@ -95,7 +102,6 @@ foreach($fdHand in $fdHandData)
     
     #Add Custom Card Hand To Array
     $arrCstHandData += $cstCardHand;
-
 
 }#End of $fdHandData Foreach
 
